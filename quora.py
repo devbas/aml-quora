@@ -2,8 +2,8 @@
 
 - The project uses Python3
 - Make sure you have the nltk corpus installed:
-	* import nltk 
-	* nltk.download()
+	* >>> import nltk 
+	* >>> nltk.download()
 	* Download all collections 
 
 '''
@@ -37,7 +37,6 @@ def word_tokens(row):
 
 	return output
 
-
 train_tokenized = train_df.apply(word_tokens, axis=1, raw=True)
 
 
@@ -51,7 +50,6 @@ def stopword_removal(row):
 	output['question2'] = [w for w in row['question2'] if not w in stop_words]
 
 	return output
-
 
 train_tokenized = train_tokenized.apply(stopword_removal, axis=1, raw=True)
 
