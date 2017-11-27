@@ -30,7 +30,7 @@ print('number of observations: {:,}'.format(train_df.shape[0]))
 
 # 3. Split text
 def word_tokens(row): 
-
+   
 	output = row;
 	output['question1'] = word_tokenize(str(row['question1']).lower())
 	output['question2'] = word_tokenize(str(row['question2']).lower())
