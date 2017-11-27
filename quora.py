@@ -28,7 +28,7 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',level=log
 
 path = os.getcwd()
 os.chdir(path)
-train_df = pd.read_csv("data/train_data.csv", nrows=20, delimiter=',')
+train_df = pd.read_csv("data/train_data.csv", nrows=1000, delimiter=',')
 #train_df.head()
 print('number of observations: {:,}'.format(train_df.shape[0]))
 
@@ -84,10 +84,14 @@ downsampling = 1e-3   # Downsample setting for frequent words
 
 print('sentences: ', sentences);
 
-model = word2vec.Word2Vec(sentences, size=num_features, window = context)
+model = word2vec.Word2Vec(sentences, size=5, window = context, min_count=2, workers=num_workers, sample=downsampling)
 
-model_name = "300features_40minwords_10context"
+model_name = "model"
 model.save(model_name)
+model = word2vec.Word2Vec.load(model_name)
+
+print('similarity-test: ',model.wv.most_similar(positive=['muslim']))
+
 
 '''def calculate_vocabulary_size(row): 
   row_size = len(row['question1']) + len(row['question2']) 
