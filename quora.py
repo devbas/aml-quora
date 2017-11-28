@@ -133,7 +133,8 @@ def testNeuralNet(x_test):
                 loss='binary_crossentropy',
                 metrics=['accuracy'])
 
-  model.predict(x_test, batch_size=32)
+  output = model.predict(x_test, batch_size=32)
+  output.to_csv('data/outputPrediction.csv')
 
 
 
