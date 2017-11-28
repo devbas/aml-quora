@@ -17,7 +17,8 @@ import os
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem.porter import *
-#from keras.preprocessing.text import one_hot
+from keras.models import Sequential
+from keras.layers import Dense, Activation
 from gensim.models import word2vec
 import logging
 
@@ -28,10 +29,10 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',level=log
 
 path = os.getcwd()
 os.chdir(path)
-train_df = pd.read_csv("data/train_data.csv", nrows=1000, delimiter=',')
+train_df = pd.read_csv("data/train_data.csv", nrows=500000, delimiter=',')
+train_labels = pd.read_csv("data/train_labels.csv", nrows=500000, delimiter=',')
+train_labels = train_labels['is_duplicate']
 #train_df.head()
-print('number of observations: {:,}'.format(train_df.shape[0]))
-
 
 # 3. Split text
 def word_tokens(row): 
@@ -74,7 +75,7 @@ train_tokenized = train_tokenized.apply(stemming_row, axis=1, raw=True)
 
 
 # 6. Set vocabulary/Dictionary 
-sentences = train_tokenized['question1'];
+sentences = [train_tokenized['question1'], train_tokenized['question2']];
 
 num_features = 300    # Word vector dimensionality                      
 min_word_count = 40   # Minimum word count                        
@@ -84,25 +85,31 @@ downsampling = 1e-3   # Downsample setting for frequent words
 
 print('sentences: ', sentences);
 
-model = word2vec.Word2Vec(sentences, size=5, window = context, min_count=2, workers=num_workers, sample=downsampling)
+model = word2vec.Word2Vec(sentences, size=300, window = context, min_count=2, workers=num_workers, sample=downsampling)
 
 model_name = "model"
 model.save(model_name)
-model = word2vec.Word2Vec.load(model_name)
+wordModel = word2vec.Word2Vec.load(model_name)
 
-print('similarity-test: ',model.wv.most_similar(positive=['muslim']))
-
-
-'''def calculate_vocabulary_size(row): 
-  row_size = len(row['question1']) + len(row['question2']) 
-
-  return row_size
-
-vocabulary_size = train_tokenized.apply(calculate_vocabulary_size, axis=1, raw=True)'''
-
-#print('question1: ', len(train_tokenized['question1']))
-
-#def create_library(row): 
-
+#print('similarity-test: ',wordModel.wv.most_similar(positive=['muslim'], negative=['man']))
 
 # 7. TF IDF
+
+
+# 8. RNN (LSTM)
+def makeTrainModel(x_train, y_train):
+  model = Sequential()
+  model.add(Dense(64, input_dim=len(wordModel), activation='relu'))
+  model.add(Dense(16, activation='relu'))
+  model.add(Dense(16, activation='relu'))
+  model.add(Dense(16, activation='relu'))
+  model.add(Dense(1, activation='sigmoid'))
+
+  model.compile(optimizer='rmsprop',
+                loss='binary_crossentropy',
+                metrics=['accuracy'])
+
+  model.fit(x_train, y_train, epochs=10, batch_size=32)
+
+
+makeTrainModel(wordModel, train_labels)
