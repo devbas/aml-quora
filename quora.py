@@ -29,9 +29,9 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',level=log
 
 path = os.getcwd()
 os.chdir(path)
-train_df = pd.read_csv("data/train_data.csv", nrows=500000, delimiter=',')
-test_df = pd.read_csv("data/test_data.csv", nrows=100000, delimiter=',')
-train_labels = pd.read_csv("data/train_labels.csv", nrows=500000, delimiter=',')
+train_df = pd.read_csv("data/train_data.csv", nrows=10000, delimiter=',')
+test_df = pd.read_csv("data/test_data.csv", nrows=10000, delimiter=',')
+train_labels = pd.read_csv("data/train_labels.csv", nrows=50000, delimiter=',')
 train_labels = train_labels['is_duplicate']
 #train_df.head()
 
@@ -78,8 +78,8 @@ train_tokenized = train_tokenized.apply(stemming_row, axis=1, raw=True)
 test_tokenized = test_tokenized.apply(stemming_row, axis=1, raw=True)
 
 # 6. Set vocabulary/Dictionary 
-sentences = [train_tokenized['question1'], train_tokenized['question2']];
-test_sentences = [test_tokenized['question1'], test_tokenized['question2']];
+sentences = np.concatenate((train_tokenized['question1'], train_tokenized['question2']), axis=1);
+test_sentences = np.concatenate((test_tokenized['question1'], test_tokenized['question2']), axis=1);
 
 
 
@@ -115,28 +115,32 @@ def trainNeuralNet(x_train, y_train):
   model.add(Dense(16, activation='relu'))
   model.add(Dense(1, activation='sigmoid'))
 
-  model.compile(optimizer='rmsprop',
-                loss='binary_crossentropy',
-                metrics=['accuracy'])
+  model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
 
   model.fit(x_train, y_train, epochs=10, batch_size=32)
 
-def testNeuralNet(x_test):
-  model = Sequential()
-  model.add(Dense(64, input_dim=len(wordModel), activation='relu'))
-  model.add(Dense(16, activation='relu'))
-  model.add(Dense(16, activation='relu'))
-  model.add(Dense(16, activation='relu'))
-  model.add(Dense(1, activation='sigmoid'))
-
-  model.compile(optimizer='rmsprop',
-                loss='binary_crossentropy',
-                metrics=['accuracy'])
-
-  output = model.predict(x_test, batch_size=32)
-  output.to_csv('data/outputPrediction.csv')
-
-
-
 trainNeuralNet(trainWordModel, train_labels)
-testNeuralNet(testWordModel)
+
+#def testNeuralNet(x_test):
+model = Sequential()
+model.add(Dense(64, input_dim=len(wordModel), activation='relu'))
+model.add(Dense(16, activation='relu'))
+model.add(Dense(16, activation='relu'))
+model.add(Dense(16, activation='relu'))
+model.add(Dense(1, activation='sigmoid'))
+
+model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
+
+output = model.predict(x_test, batch_size=32)
+
+rounded = [int(round(x[0])) for x in predictions]
+
+
+submission_df = pd.DataFrame(index=test_df.test_id, columns=['is_duplicate'], dtype=np.uint)
+submission_df.index.name = 'test_id'
+submission_df.is_duplicate = rounded
+
+submission_df.to_csv('data/submission.csv')
+
+
+#testNeuralNet(testWordModel)
