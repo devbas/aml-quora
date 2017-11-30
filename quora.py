@@ -31,7 +31,7 @@ path = os.getcwd()
 os.chdir(path)
 train_df = pd.read_csv("data/train_data.csv", nrows=10000, delimiter=',')
 test_df = pd.read_csv("data/test_data.csv", nrows=10000, delimiter=',')
-train_labels = pd.read_csv("data/train_labels.csv", nrows=50000, delimiter=',')
+train_labels = pd.read_csv("data/train_labels.csv", nrows=10000, delimiter=',')
 train_labels = train_labels['is_duplicate']
 #train_df.head()
 
@@ -78,8 +78,8 @@ train_tokenized = train_tokenized.apply(stemming_row, axis=1, raw=True)
 test_tokenized = test_tokenized.apply(stemming_row, axis=1, raw=True)
 
 # 6. Set vocabulary/Dictionary 
-sentences = np.concatenate((train_tokenized['question1'], train_tokenized['question2']), axis=1);
-test_sentences = np.concatenate((test_tokenized['question1'], test_tokenized['question2']), axis=1);
+sentences = np.concatenate((train_tokenized['question1'], train_tokenized['question2']), axis=0);
+test_sentences = np.concatenate((test_tokenized['question1'], test_tokenized['question2']), axis=0);
 
 
 
@@ -91,15 +91,16 @@ downsampling = 1e-3   # Downsample setting for frequent words
 
 print('sentences: ', sentences);
 
-train_model = word2vec.Word2Vec(sentences, size=300, window = context, min_count=2, workers=num_workers, sample=downsampling)
-test_model = word2vec.Word2Vec(test_sentences, size=300, window = context, min_count=2, workers=num_workers, sample=downsampling)
+trainWordModel = word2vec.Word2Vec(sentences, size=5, window = context, min_count=2, workers=num_workers, sample=downsampling)
+testWordModel = word2vec.Word2Vec(test_sentences, size=5, window = context, min_count=2, workers=num_workers, sample=downsampling)
 
 
 
-train_model.save("train_model")
-test_model.save("test_model")
-trainWordModel = word2vec.Word2Vec.load(train_model)
-testWordModel = word2vec.Word2Vec.load(test_model)
+#train_model.save("train_model")
+#test_model.save("test_model")
+#trainWordModel = word2vec.Word2Vec.load(train_model)
+#testWordModel = word2vec.Word2Vec.load(test_model)
+
 
 #print('similarity-test: ',wordModel.wv.most_similar(positive=['muslim'], negative=['man']))
 
@@ -109,7 +110,7 @@ testWordModel = word2vec.Word2Vec.load(test_model)
 # 8. RNN (LSTM)
 def trainNeuralNet(x_train, y_train):
   model = Sequential()
-  model.add(Dense(64, input_dim=len(wordModel), activation='relu'))
+  model.add(Dense(64, input_dim=32, activation='relu'))
   model.add(Dense(16, activation='relu'))
   model.add(Dense(16, activation='relu'))
   model.add(Dense(16, activation='relu'))
@@ -123,7 +124,7 @@ trainNeuralNet(trainWordModel, train_labels)
 
 #def testNeuralNet(x_test):
 model = Sequential()
-model.add(Dense(64, input_dim=len(wordModel), activation='relu'))
+model.add(Dense(64, input_dim=32, activation='relu'))
 model.add(Dense(16, activation='relu'))
 model.add(Dense(16, activation='relu'))
 model.add(Dense(16, activation='relu'))
