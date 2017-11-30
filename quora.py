@@ -96,10 +96,10 @@ testWordModel = word2vec.Word2Vec(test_sentences, size=5, window = context, min_
 
 
 
-#train_model.save("train_model")
-#test_model.save("test_model")
-#trainWordModel = word2vec.Word2Vec.load(train_model)
-#testWordModel = word2vec.Word2Vec.load(test_model)
+trainWordModel.save("trainWordModel")
+testWordModel.save("testWordModel")
+trainWords = word2vec.Word2Vec.load(trainWordModel)
+testWords = word2vec.Word2Vec.load(testWordModel)
 
 
 #print('similarity-test: ',wordModel.wv.most_similar(positive=['muslim'], negative=['man']))
@@ -120,7 +120,7 @@ def trainNeuralNet(x_train, y_train):
 
   model.fit(x_train, y_train, epochs=10, batch_size=32)
 
-trainNeuralNet(trainWordModel, train_labels)
+trainNeuralNet(trainWords, train_labels)
 
 #def testNeuralNet(x_test):
 model = Sequential()
@@ -132,7 +132,7 @@ model.add(Dense(1, activation='sigmoid'))
 
 model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
 
-output = model.predict(x_test, batch_size=32)
+output = model.predict(testWords, batch_size=32)
 
 rounded = [int(round(x[0])) for x in predictions]
 
