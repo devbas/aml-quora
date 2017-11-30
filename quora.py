@@ -134,12 +134,10 @@ model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accurac
 
 output = model.predict(testWords, batch_size=32)
 
-rounded = [int(round(x[0])) for x in predictions]
-
 
 submission_df = pd.DataFrame(index=test_df.test_id, columns=['is_duplicate'], dtype=np.uint)
 submission_df.index.name = 'test_id'
-submission_df.is_duplicate = rounded
+submission_df.is_duplicate = output
 
 submission_df.to_csv('data/submission.csv')
 
