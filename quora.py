@@ -1,13 +1,3 @@
-''' Prerequisites: 
-
-- The project uses Python3
-- Make sure you have the nltk corpus installed:
-	* >>> import nltk 
-	* >>> nltk.download()
-	* Download all collections 
-
-'''
-
 # 1. Import packages
 
 import matplotlib.pyplot as plt
@@ -33,7 +23,6 @@ train_df = pd.read_csv("data/train_data.csv", nrows=1000, delimiter=',')
 test_df = pd.read_csv("data/test_data.csv", nrows=1000, delimiter=',')
 train_labels = pd.read_csv("data/train_labels.csv", nrows=1000, delimiter=',')
 train_labels = train_labels['is_duplicate']
-#train_df.head()
 
 # 3. Split text
 train_tokenized = train_df.apply(tokens.word_tokens, axis=1, raw=True)
@@ -68,7 +57,7 @@ downsampling = 1e-3   # Downsample setting for frequent words
 trainWordModel = word2vec.Word2Vec(sentences, size=5, window = context, min_count=1, workers=num_workers, sample=downsampling)
 testWordModel = word2vec.Word2Vec(test_sentences, size=5, window = context, min_count=1, workers=num_workers, sample=downsampling)
 
-
+# Add zero padding, make the matrix as wide as the longest sentence
 
 trainWordModel.save("trainWordModel")
 testWordModel.save("testWordModel")
