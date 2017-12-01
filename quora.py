@@ -1,6 +1,4 @@
 # 1. Import packages
-
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import os
@@ -9,9 +7,9 @@ from keras.layers import Dense, Activation
 from keras.preprocessing.sequence import pad_sequences
 from gensim.models import word2vec
 import logging
-import src.stemming as stemming
-import src.tokens as tokens
-import src.longest as longest
+import utils.stemming as stemming
+import utils.tokens as tokens
+import utils.longest as longest
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',level=logging.INFO)
 
 # 2. User setting 1: Import data
