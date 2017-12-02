@@ -15,7 +15,7 @@ import utils.dictionary as dictionary
 # Important: data needs to be stored in directory 'data' in parent folder of current working directory
 path = os.getcwd()
 os.chdir(path)
-train_df = pd.read_csv("data/train_data.csv", delimiter=',')
+train_df = pd.read_csv("data/train_data.csv", nrows=1000, delimiter=',')
 
 questions = list(train_df['question1']) + list(train_df['question2'])
 
@@ -41,6 +41,11 @@ model.init_sims(replace=True)
 # create a dict 
 w2v = dict(zip(model.wv.index2word, model.wv.syn0))
 print("Number of tokens in Word2Vec:", len(w2v.keys()))
+
+
+# 6. Save model
+model.save('output/word2vec.mdl')
+model.wv.save_word2vec_format('output/word2vec.bin', binary=True)
 
 
 # 5. Word to dictionary
