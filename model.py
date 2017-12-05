@@ -1,4 +1,5 @@
 # 1. Import packages
+from __future__ import unicode_literals
 
 import numpy as np
 import pandas as pd
@@ -10,6 +11,7 @@ from keras.preprocessing import sequence
 from keras.models import Sequential
 from keras.layers import Dense, Activation
 import logging
+import re
 
 from utils.stemming import stemming_row
 from utils.tokens import word_tokens
@@ -33,6 +35,53 @@ train_duplicate = pd.read_csv("data/train_labels.csv", delimiter=',')
 
 # -------------------------------------------- SECTION 2 
 # As you see, we start over with `train_df` in TFIDF
+
+print('question1: ', train_df['question1'])
+
+def filter(text): 
+
+	text = str(text)
+	text = text.lower()
+
+    # Clean the text
+	text = re.sub(r"[^A-Za-z0-9^,!.\/'+-=]", " ", text)
+	text = re.sub(r"what's", "what is ", text)
+	text = re.sub(r"\'s", " ", text)
+	text = re.sub(r"\'ve", " have ", text)
+	text = re.sub(r"can't", "cannot ", text)
+	text = re.sub(r"n't", " not ", text)
+	text = re.sub(r"i'm", "i am ", text)
+	text = re.sub(r"\'re", " are ", text)
+	text = re.sub(r"\'d", " would ", text)
+	text = re.sub(r"\'ll", " will ", text)
+	text = re.sub(r",", " ", text)
+	text = re.sub(r"\.", " ", text)
+	text = re.sub(r"!", " ! ", text)
+	text = re.sub(r"\/", " ", text)
+	text = re.sub(r"\^", " ^ ", text)
+	text = re.sub(r"\+", " + ", text)
+	text = re.sub(r"\-", " - ", text)
+	text = re.sub(r"\=", " = ", text)
+	text = re.sub(r"'", " ", text)
+	text = re.sub(r"(\d+)(k)", r"\g<1>000", text)
+	text = re.sub(r":", " : ", text)
+	text = re.sub(r" e g ", " eg ", text)
+	text = re.sub(r" b g ", " bg ", text)
+	text = re.sub(r" u s ", " american ", text)
+	text = re.sub(r"\0s", "0", text)
+	text = re.sub(r" 9 11 ", "911", text)
+	text = re.sub(r"e - mail", "email", text)
+	text = re.sub(r"j k", "jk", text)
+	text = re.sub(r"\s{2,}", " ", text)
+
+	return text
+
+
+train_df['question1'] = [filter(question1) for question1 in train_df['question1']]
+train_df['question2'] = [filter(question2) for question2 in train_df['question2']]
+test_df['question1'] = [filter(question1) for question1 in test_df['question1']]
+test_df['question2'] = [filter(question2) for question2 in test_df['question2']]
+
 
 # 7. TF-IDF 
 train_df['q1_feats'] = tfidf(train_df['question1'])
@@ -77,7 +126,7 @@ submission_df.is_duplicate = rounded
 
 submission_df.to_csv('output/submission.csv')
 
-print('predications: ', predictions)
+#print('predications: ', predictions)
 
 #for counter, distance in enumerate(distances): 
 	#print(counter, '  distance:', distance, ' is duplicate: ', train_duplicate['is_duplicate'][counter])
