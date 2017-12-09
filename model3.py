@@ -17,9 +17,9 @@ from utils.distance import distance
 # Important: data needs to be stored in directory 'data' in parent folder of current working directory
 path = os.getcwd()
 os.chdir(path)
-train_df = pd.read_csv("data/train_data.csv", nrows=100, delimiter=',')
-test_df = pd.read_csv("data/test_data.csv", nrows=100, delimiter=',')
-train_duplicate = pd.read_csv("data/train_labels.csv", nrows=100, delimiter=',')
+train_df = pd.read_csv("data/train_data.csv", delimiter=',')
+test_df = pd.read_csv("data/test_data.csv", delimiter=',')
+train_duplicate = pd.read_csv("data/train_labels.csv", delimiter=',')
 
 stemmer = PorterStemmer()
 
@@ -59,14 +59,6 @@ def filter(text):
 	text = re.sub(r"j k", "jk", text)
 	text = re.sub(r"\s{2,}", " ", text)
 
-	#text = stemmer.stem(text)
-
-	#text = text.split()
-
-	#text = text[:5]
-
-	#print('text: ', text)
-
 	return text
 
 # 1. Split text, stem words, clean the text
@@ -97,35 +89,39 @@ train_distances = distance(train_questions1, train_questions2)
 test_distances = distance(test_questions1, test_questions2)
 
 
+# 4. Create 2D array 
+train_distances = np.reshape(train_distances, (-1, 1))
+test_distances = np.reshape(test_distances, (-1, 1))
+
+# 5. Save TDIDF + Euc. distance to file 
+np.save('train_distances', train_distances)
+np.save('test_distances', test_distances)
+
+
 # 4. XGBoost
 X_train, X_test, y_train, y_test = train_test_split(train_distances, train_duplicate['is_duplicate'].values, test_size=0.2, random_state=0)
 
-print('train shape: ', X_train.shape)
-print('train test shape: ', X_test.shape)
-print('y train shape: ', y_train.shape)
-print('y test shape: ', y_test.shape)
-
-#print('dtrain: ', x_train.num_col())
-
-#x_train = np.array(x_train).reshape((1,-1))
-#y_train = np.array(y_train).reshape((1,-1))
 
 dtrain = xgb.DMatrix(X_train, label=y_train)
 dvalid = xgb.DMatrix(X_test, label=y_test)
 
-#dtrain = xgb.DMatrix(np.array(X_train).reshape((1,-1)), label=y_train)
-#dvalid = xgb.DMatrix(np.array(X_test).reshape((1,-1)), label=y_test)
+watchlist = [(dvalid, 'valid'), (dtrain, 'train')]
 
-print('dtrain: ', dtrain.num_col())
-
-evallist = [(dvalid, 'eval'), (dtrain, 'train')]
-
-params = {'max_depth':1, 'eta':1, 'silent':1, 'objective':'binary:logistic' }
+params = {}
+params['objective'] = 'binary:logistic'
+params['eval_metric'] = 'logloss'
+params['eta'] = 0.02
+params['max_depth'] = 4
 
 num_round = 2
 
-bst = xgb.train(params, dtrain, 2, evallist)
-#print(log_loss(train.is_duplicate, bst.predict(xgb.DMatrix(df))))
-'''bst.save_model('0001.model')
+bst = xgb.train(params, dtrain, 400, watchlist, early_stopping_rounds=50, verbose_eval=10)
+bst.save_model('0001.model')
 
-print('train_distances: ', bst)'''
+d_test = xgb.DMatrix(test_distances)
+p_test = bst.predict(d_test)
+
+sub = pd.DataFrame()
+sub['test_id'] = test_df['test_id']
+sub['is_duplicate'] = np.round(p_test).astype(int)
+sub.to_csv('simple_xgb.csv', index=False)
