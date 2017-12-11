@@ -10,6 +10,5 @@ def tfidf(questions):
 
 	print('Features to vec')
 	output = vec_features(questions, word2tfidf)
-	#train_df['q2_feats'] = vec_features(train_df['question2'], word2tfidf)
 
 	return output

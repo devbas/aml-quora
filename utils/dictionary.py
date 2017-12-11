@@ -9,7 +9,6 @@ def word_to_index(word):
 
 
 def create_dict(row): 
-	print('row: ', row['question1'])
 
 	for count, word in enumerate(row['question1']):
 		row['question1'][count] = word_to_index(word)
