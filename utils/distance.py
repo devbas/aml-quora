@@ -4,7 +4,6 @@ from utils.euclidean_distance import euclidean_distance
 def distance(questions1, questions2): 
 
 	# We suppose both variables have the same len()
-
 	distances = np.zeros(len(questions1))
 
 	counter = 0
