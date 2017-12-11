@@ -75,7 +75,7 @@ test_df['q1_feats'] = tfidf(test_df['question1'])
 test_df['q2_feats'] = tfidf(test_df['question2'])
 
 
-# 3. Calculate distances (Euclidean)
+# 3. Calculate distances (Cosine Similarity)
 train_longest = longest_question(train_df['q1_feats'], train_df['q2_feats'])
 test_longest = longest_question(test_df['q1_feats'], test_df['q2_feats'])
 
@@ -93,9 +93,9 @@ test_distances = distance(test_questions1, test_questions2)
 train_distances = np.reshape(train_distances, (-1, 1))
 test_distances = np.reshape(test_distances, (-1, 1))
 
-# 5. Save TDIDF + Euc. distance to file 
-np.save('train_distances', train_distances)
-np.save('test_distances', test_distances)
+# 5. Save TDIDF + Cosine. similarity to file 
+np.save('train_distances1', train_distances)
+np.save('test_distances1', test_distances)
 
 
 # 4. XGBoost
